@@ -21,6 +21,8 @@ env:
     value: 1:495529206541:web:9270ac7178c533bceb0644
   - variable: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
     value: AIzaSyDhm-Zf1e-YYVhA8a8qGgiadIa7kdd3Mck
+  - variable: NEXT_PUBLIC_APP_URL
+    value: https://fixlink.co.za
   - variable: GMAIL_USER
     value: fixsynsa@gmail.com
 

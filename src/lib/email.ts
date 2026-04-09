@@ -23,7 +23,7 @@ export async function sendWelcomeEmail(to: string, name: string) {
         <p>We're thrilled to have you join our marketplace.</p>
         <p>Whether you're looking for professional help or providing world-class services, Fix Link is here to help you connect and grow.</p>
         <div style="margin: 30px 0;">
-          <a href="https://fixlink.co.za/login" style="background: #1E4E79; color: white; padding: 15px 25px; text-decoration: none; border-radius: 10px; font-weight: bold;">Access Your Dashboard</a>
+          <a href="${process.env.NEXT_PUBLIC_APP_URL || ''}/login" style="background: #1E4E79; color: white; padding: 15px 25px; text-decoration: none; border-radius: 10px; font-weight: bold;">Access Your Dashboard</a>
         </div>
         <p style="color: #666; font-size: 12px;">If you have any questions, feel free to reply to this email.</p>
         <p style="font-weight: bold; color: #1E4E79;">The Fix Link Team</p>

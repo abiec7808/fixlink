@@ -9,7 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@clerk/nextjs": "^7.0.8",
     "@types/nodemailer": "^8.0.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
