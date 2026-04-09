@@ -232,12 +232,21 @@ export const updateStock = async (userId: string, itemId: string, change: number
 };
 
 export const getJob = async (jobId: string): Promise<Job | null> => {
-  const jobRef = doc(db, 'jobs', jobId);
-  const jobSnap = await getDoc(jobRef);
-  if (jobSnap.exists()) {
-    return { ...jobSnap.data(), id: jobSnap.id } as Job;
+  try {
+    const jobRef = doc(db, 'jobs', jobId);
+    const jobSnap = await getDoc(jobRef);
+    if (jobSnap.exists()) {
+      return { ...jobSnap.data(), id: jobSnap.id } as Job;
+    }
+    return null;
+  } catch (error: any) {
+    if (error.code === 'permission-denied') {
+      console.error(`Firestore Permission Denied for job ${jobId}. Ensure security rules allow access.`, error);
+    } else {
+      console.error(`Error fetching job ${jobId}:`, error);
+    }
+    throw error;
   }
-  return null;
 };
 
 export const updateJob = async (jobId: string, data: any) => {
