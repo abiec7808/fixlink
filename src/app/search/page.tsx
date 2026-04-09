@@ -99,12 +99,21 @@ function SearchResultsContent() {
   const searchParams = useSearchParams();
   const queryParam = searchParams.get('q') || 'General Services';
   const locationParam = searchParams.get('loc') || 'Central Cape Town';
+  const latParam = searchParams.get('lat');
+  const lngParam = searchParams.get('lng');
   
   const [activeTab, setActiveTab] = useState<'list' | 'map'>('list');
   const [selectedTrade, setSelectedTrade] = useState<string>(queryParam);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [pros, setPros] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Dynamic Center based on search params
+  const centerPosition: any = latParam && lngParam 
+    ? [parseFloat(latParam), parseFloat(lngParam)]
+    : [-33.9249, 18.4241];
+  
+  const zoomLevel = latParam && lngParam ? 14 : 12;
 
   React.useEffect(() => {
     const fetchPros = async () => {
@@ -114,20 +123,29 @@ function SearchResultsContent() {
         const allPros = await getUsersByRole('tradesman');
         
         // Map to search format
-        const mappedPros = allPros.map(p => ({
-          id: p.id,
-          name: p.fullName,
-          trade: p.trade || 'Generalist',
-          rating: 4.8 + (Math.random() * 0.2), // Random initial rating
-          reviews: Math.floor(Math.random() * 150),
-          priceRange: 'R450 - R850 / hr',
-          description: p.businessName || 'Professional trade specialist registered on Fix Link.',
-          image: p.imageUrl || `https://i.pravatar.cc/150?u=${p.id}`,
-          featured: p.tier === 'legend',
-          location: [-33.9249 + (Math.random() * 0.05 - 0.025), 18.4241 + (Math.random() * 0.05 - 0.025)] as any,
-          verified: true,
-          tier: p.tier
-        }));
+        const mappedPros = allPros.map(p => {
+          // If we have a searched location, cluster results near it for simulation
+          const baseLat = latParam ? parseFloat(latParam) : -33.9249;
+          const baseLng = lngParam ? parseFloat(lngParam) : 18.4241;
+          
+          return {
+            id: p.id,
+            name: p.fullName,
+            trade: p.trade || 'Generalist',
+            rating: 4.8 + (Math.random() * 0.2),
+            reviews: Math.floor(Math.random() * 150),
+            priceRange: 'R450 - R850 / hr',
+            description: p.businessName || 'Professional trade specialist registered on Fix Link.',
+            image: p.imageUrl || `https://i.pravatar.cc/150?u=${p.id}`,
+            featured: p.tier === 'legend',
+            location: [
+              baseLat + (Math.random() * 0.04 - 0.02), 
+              baseLng + (Math.random() * 0.04 - 0.02)
+            ] as any,
+            verified: true,
+            tier: p.tier
+          };
+        });
 
         setPros(mappedPros);
       } catch (error) {
@@ -137,7 +155,7 @@ function SearchResultsContent() {
       }
     };
     fetchPros();
-  }, []);
+  }, [latParam, lngParam]); // Refetch if location changes
 
   const filteredPros = pros.filter(pro => 
     selectedTrade === 'General Services' || 
@@ -150,12 +168,8 @@ function SearchResultsContent() {
       router.push(`/login?redirect_url=${encodeURIComponent(window.location.pathname + window.location.search)}`);
       return;
     }
-    // Logic for contacting if logged in
     alert(`Contacting ${pro.name}... Opening secure chat.`);
   };
-
-  // Cape Town Center
-  const centerPosition: any = [-33.9249, 18.4241];
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
@@ -169,6 +183,9 @@ function SearchResultsContent() {
           <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 mb-4 uppercase italic">
             Found {filteredPros.length} <span className="text-primary">Professionals</span>
           </h1>
+          <p className="text-slate-400 font-bold text-sm uppercase mb-6 flex items-center gap-2">
+             <MapPin className="w-4 h-4" /> Results near <span className="text-slate-900">{locationParam}</span>
+          </p>
           
           <div className="relative inline-block w-full max-w-sm">
             <button 
@@ -238,8 +255,8 @@ function SearchResultsContent() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* Results Sidebar / Content */}
-        <div className={`lg:col-span-8 space-y-6 ${activeTab === 'map' ? 'hidden lg:block' : ''}`}>
+        {/* Results Sidebar / Content - 7 columns */}
+        <div className={`lg:col-span-7 space-y-6 ${activeTab === 'map' ? 'hidden lg:block' : ''}`}>
           {filteredPros.map((pro, index) => (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -259,7 +276,7 @@ function SearchResultsContent() {
                   <img src={pro.image} alt={pro.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                   <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-white/90 backdrop-blur-md rounded-xl shadow-lg flex items-center gap-1">
                     <Star className="w-3 h-3 text-accent fill-accent" />
-                    <span className="text-[10px] font-black">{pro.rating}</span>
+                    <span className="text-[10px] font-black">{pro.rating.toFixed(1)}</span>
                   </div>
                 </div>
 
@@ -325,14 +342,13 @@ function SearchResultsContent() {
           )}
         </div>
 
-        {/* Map Mockup Area */}
-        <div className={`lg:col-span-4 sticky top-32 h-[calc(100vh-160px)] ${activeTab === 'list' ? 'hidden lg:block' : 'col-span-1 block'}`}>
-          <div className="w-full h-full bg-slate-100 rounded-[3rem] border border-slate-200 overflow-hidden shadow-2xl relative">
-            {/* Map Container */}
+        {/* Dynamic Map - 5 columns */}
+        <div className={`lg:col-span-5 sticky top-32 h-[calc(100vh-140px)] ${activeTab === 'list' ? 'hidden lg:block' : 'col-span-1 block'}`}>
+          <div className="w-full h-full bg-slate-100 rounded-[3rem] border border-slate-200 overflow-hidden shadow-2xl relative transition-all duration-500">
             <div className="absolute inset-0 z-0 bg-[#e5e7eb]">
                <MapContainer 
                  center={centerPosition} 
-                 zoom={13} 
+                 zoom={zoomLevel} 
                  style={{ height: '100%', width: '100%' }}
                  {...({ scrollWheelZoom: false } as any)}
                >
@@ -363,7 +379,7 @@ function SearchResultsContent() {
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1 italic">Scan Complete</p>
-                    <p className="text-sm font-black text-slate-900">Cape Town Cluster Active</p>
+                    <p className="text-sm font-black text-slate-900 truncate max-w-[200px]">{locationParam}</p>
                   </div>
                 </div>
               </div>
@@ -379,10 +395,10 @@ function SearchResultsContent() {
                      </div>
                   </div>
                   <p className="text-white font-bold text-sm mb-6 leading-relaxed">
-                    Analyzing <span className="text-primary italic">70km radius</span> around Cape Town Central...
+                    Analyzing <span className="text-primary italic">70km radius</span> around {locationParam.split(',')[0]}...
                   </p>
                   <button className="w-full py-4 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/40 hover:scale-[1.02] active:scale-95 transition-all">
-                    Update Search Area
+                    Refine Search Area
                   </button>
                </div>
             </div>
