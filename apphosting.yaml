@@ -1,0 +1,33 @@
+# Firebase App Hosting Configuration
+# See https://firebase.google.com/docs/app-hosting/configure
+
+runtime:
+  node:
+    version: 20
+
+# Environment variables for build and runtime
+env:
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: AIzaSyDVXnXiICBd0cottPaPlySVqGy_NJGk3oo
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: fix-link-marketplace-928374.firebaseapp.com
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: fix-link-marketplace-928374
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: fix-link-marketplace-928374.firebasestorage.app
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "495529206541"
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: 1:495529206541:web:9270ac7178c533bceb0644
+  - variable: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    value: AIzaSyDhm-Zf1e-YYVhA8a8qGgiadIa7kdd3Mck
+  - variable: GMAIL_USER
+    value: fixsynsa@gmail.com
+
+# Secrets from Google Cloud Secret Manager
+# You must create these secrets in the Google Cloud Console first.
+secrets:
+  - variable: FIREBASE_SERVICE_ACCOUNT_KEY
+    secret: fixlink_service_account_key
+  - variable: GMAIL_APP_PASSWORD
+    secret: fixlink_gmail_app_password
